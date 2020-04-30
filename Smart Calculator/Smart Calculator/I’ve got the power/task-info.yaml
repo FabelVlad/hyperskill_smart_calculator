@@ -1,0 +1,185 @@
+type: edu
+custom_name: stage7
+files:
+- name: tests.py
+  visible: false
+  text: |
+    from hstest.stage_test import *
+    from hstest.test_case import TestCase
+
+    CheckResult.correct = lambda: CheckResult(True, '')
+    CheckResult.wrong = lambda feedback: CheckResult(False, feedback)
+
+
+    class CalcTest(StageTest):
+        def generate(self) -> List[TestCase]:
+            cases = {"4 + 6 - 8\n\n\n2 - 3 - 4\n\n8 + 7 - 4\n1 +++ 2 * 3 -- 4\n/exit": "2\n-5\n11\n11\nBye!",
+                     "/command\n/exit": "Unknown command\nBye!",
+                     "3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1)\n/exit": "121\nBye!",
+                     "8 * 3 + 12 * (4 - 2)\n4 * (2 + 3\n4 + 3)\n/exit": "48\nInvalid expression\nInvalid expression\nBye!",
+                     "a = 4\nb = 5\nc = 6\na*2+b*3+c*(2+3)\n/exit": "53\nBye!",
+                     "a = 1\na = 2\na = 3\na\n/exit": "3\nBye!"}
+            return [TestCase(stdin=case,
+                             attach=cases[case])
+                    for case in cases]
+
+        def check(self, reply: str, attach) -> CheckResult:
+            return CheckResult(reply.strip() == attach.strip(), "")
+
+
+    if __name__ == '__main__':
+        CalcTest("calculator.calculator").run_tests()
+  learner_created: false
+- name: calculator/calculator.py
+  visible: true
+  text: |+
+    # # write your code here
+    # import string
+    # letters = list(string.ascii_letters)
+    # command = '/exit'
+    # numbers = list(string.digits)
+    # symbols = ['-', '+']
+    # while True:
+    #     try:
+    #         text = input()
+    #         if ('/' not in text and text[0] in letters) or text[-1] in symbols:
+    #             print('Invalid expression')
+    #         elif '/' == text[0] and text != command:
+    #             print('Unknown command')
+    #         elif text == command:
+    #             print('Bye!')
+    #             exit()
+    #         else:
+    #             text_symbols = text.split()
+    #             flag = False
+    #             new_arr = []
+    #             if symbols[0] not in text and symbols[1] not in text:
+    #                 print('Invalid expression')
+    #             else:
+    #                 for i in range(len(text_symbols)):
+    #                     if text_symbols[i] == symbols[0]:
+    #                         flag = True
+    #                     elif flag:
+    #                         new_arr.append(int('-' + text_symbols[i]))
+    #                         flag = False
+    #                     elif text_symbols[i] == symbols[1]:
+    #                         pass
+    #                     else:
+    #                         new_arr.append(int(text_symbols[i]))
+    #             # print(new_arr)
+    #                 print(sum(new_arr))
+    #     except EOFError:
+    #         pass
+    #     except IndexError:
+    #         pass
+    #
+    #
+    #
+    #
+
+    import string
+
+    letters = list(string.ascii_letters)
+    commands = ['/exit', '/help']
+    degits = list(string.digits)
+    symbols = ['-', '+']
+    my_dict = {'a': 4}
+
+
+    def check_identifier(expr):
+        for char in expr:
+            if char in degits:
+                print('Invalid identifier')
+                return True
+
+
+    def input_expression():
+        expression = input()
+        if '=' in expression:
+            expression = expression.replace(' ', '').split('=')
+            if 1 < len(expression) < 3:
+                return expression, 'assiment'
+            else:
+                print('Invalid assignment')
+                return False, False
+        elif symbols[0] in expression or symbols[1] in expression:
+            expression = expression.replace('+', ' + ').replace('-', ' - ').split()
+            return expression, 'calculate'
+        elif '/' in expression:
+            return expression, 'command'
+        else:
+            if expression == '':
+                # print('\n')
+                return False, False
+            elif check_identifier(expression):
+                return False, False
+            return expression, 'view'
+
+
+
+    def do_command(command):
+        if command in commands:
+            if command == commands[0]:
+                print('Bye!')
+                exit()
+        else:
+            print('Unknown command')
+
+
+    def view(variable_name):
+        if variable_name in my_dict:
+            print(my_dict[variable_name])
+        else:
+            print('Unknown variable')
+
+
+    def calculate(chars):
+        flag = False
+        numbers = []
+        for char in chars:
+            if flag:
+                numbers.append(int('-' + str(char)))
+                flag = False
+            elif char == symbols[0]:
+                flag = True
+            elif char == symbols[1]:
+                pass
+            else:
+                numbers.append(int(char))
+        print(sum(numbers))
+
+
+    def assignment(chars):
+        left_expression = chars[0]
+        right_expression = chars[1]
+        if not check_identifier(left_expression):
+            if right_expression in my_dict:
+                my_dict[left_expression] = my_dict[right_expression]
+            else:
+                try:
+                    right_expression = int(right_expression)
+                    my_dict[left_expression] = right_expression
+                except ValueError:
+                    print('Invalid assignment')
+
+
+    while True:
+        variables, mode = input_expression()
+        if mode == 'command':
+            do_command(variables)
+        elif mode == 'view':
+            view(variables)
+        elif mode == 'calculate':
+            for i in range(len(variables)):
+                if variables[i] in my_dict:
+                    variables[i] = my_dict[variables[i]]
+            calculate(variables)
+        elif mode == 'assiment':
+            assignment(variables)
+
+
+
+  learner_created: true
+feedback_link: https://hyperskill.org/projects/74/stages/415/implement
+status: Solved
+record: 7
